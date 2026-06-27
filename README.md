@@ -35,3 +35,15 @@ A modern web browser supporting the **Web Crypto API** (Chrome, Safari, Firefox,
 1. Clone this repository:
    ```bash
    git clone [https://github.com/cyberluciferrr/zkp-and-merkle-demo.git](https://github.com/cyberluciferrr/zkp-and-merkle-demo.git)
+
+---
+
+## Snippets of UI
+
+<img width="1891" height="1013" alt="image" src="https://github.com/user-attachments/assets/38da063d-4c3d-4938-af91-262a6982758e" />
+<img width="1883" height="1007" alt="image" src="https://github.com/user-attachments/assets/80d76668-71c9-4855-b1c1-8b11f4f9222a" />
+<img width="1893" height="1013" alt="image" src="https://github.com/user-attachments/assets/167e78eb-4db7-4d0e-a9ea-c8e833f9adca" />
+<img width="1890" height="1012" alt="image" src="https://github.com/user-attachments/assets/a42a8c02-f7c8-48d1-971e-baa7c5e20b3d" />
+
+
+
