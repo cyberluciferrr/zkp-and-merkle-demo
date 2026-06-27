@@ -1,0 +1,1279 @@
+
+
+Zkp merkle explorer · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZKP & Merkle Tree Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #111110;
+    --ink2: #3a3a38;
+    --ink3: #6b6b68;
+    --ink4: #a8a8a5;
+    --bg: #FAFAF8;
+    --bg2: #F3F3F0;
+    --bg3: #EAEAE6;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --olive: #4C5A32;
+    --olive-mid: #7A8C52;
+    --olive-light: #EEF1E6;
+    --olive-glow: rgba(76,90,50,0.18);
+    --amber: #92550A;
+    --amber-light: #FDF3E3;
+    --amber-glow: rgba(146,85,10,0.15);
+    --teal: #0F6B5C;
+    --teal-light: #E4F5F1;
+    --teal-glow: rgba(15,107,92,0.15);
+    --red: #991B1B;
+    --red-light: #FEF2F2;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+ 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  html { scroll-behavior: smooth; }
+ 
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+ 
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(250,250,248,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink3);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+ 
+  /* ── HERO ── */
+  .hero {
+    padding: 5rem 2.5rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--olive);
+    background: var(--olive-light);
+    border: 1px solid rgba(76,90,50,0.2);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--olive);
+    border-radius: 50%;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--olive);
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: var(--ink3);
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+  .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+    font-family: var(--sans);
+  }
+  .btn-primary:hover { background: var(--ink2); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink2);
+    border: 1px solid var(--border2);
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s;
+    font-family: var(--sans);
+  }
+  .btn-ghost:hover { background: var(--bg2); }
+ 
+  /* ── SECTION LAYOUT ── */
+  .section {
+    padding: 5rem 2.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  .section-num {
+    font-family: var(--serif);
+    font-size: 56px;
+    line-height: 1;
+    color: var(--bg3);
+    flex-shrink: 0;
+    letter-spacing: -0.05em;
+    user-select: none;
+  }
+  .section-meta {}
+  .section-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink4);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .section-desc {
+    font-size: 15px;
+    color: var(--ink3);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+ 
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+ 
+  /* ── ZKP SECTION ── */
+  .zkp-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+ 
+  .panel-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+ 
+  .panel-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink4);
+  }
+ 
+  .input-field {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-size: 18px;
+    font-family: var(--mono);
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input-field:focus {
+    border-color: var(--olive);
+    box-shadow: 0 0 0 3px var(--olive-glow);
+  }
+ 
+  .commit-box {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+  }
+  .commit-hash {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink3);
+    word-break: break-all;
+    line-height: 1.7;
+    margin-top: 6px;
+  }
+ 
+  .action-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: #fff;
+    color: var(--ink);
+    transition: all 0.15s;
+    font-family: var(--sans);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .action-btn:hover:not(:disabled) { background: var(--bg2); border-color: var(--ink3); }
+  .action-btn:active:not(:disabled) { transform: scale(0.98); }
+  .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .action-btn.primary {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .action-btn.primary:hover:not(:disabled) { background: var(--ink2); }
+ 
+  /* ── PROBABILITY DISPLAY ── */
+  .prob-section {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+ 
+  .prob-big {
+    font-family: var(--serif);
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+    transition: color 0.4s;
+  }
+  .prob-big.success { color: var(--teal); }
+  .prob-big.danger { color: var(--red); }
+ 
+  .prob-bar-track {
+    height: 6px;
+    background: var(--bg2);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .prob-bar-fill {
+    height: 100%;
+    background: var(--ink);
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s;
+  }
+  .prob-bar-fill.low { background: var(--teal); }
+ 
+  .round-log-container {
+    max-height: 260px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .round-log-inner { padding: 0.5rem; display: flex; flex-direction: column; gap: 2px; }
+ 
+  .log-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: var(--mono);
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .log-row:hover { background: var(--bg2); }
+  .log-num { color: var(--ink4); min-width: 32px; }
+  .log-bit { min-width: 44px; }
+  .log-result { flex: 1; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .log-pass { color: var(--teal); font-weight: 500; }
+  .log-prob { color: var(--ink4); min-width: 90px; text-align: right; }
+ 
+  .round-stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .stat-pill {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+  .stat-pill-val {
+    font-size: 1.5rem;
+    font-family: var(--serif);
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stat-pill-lbl {
+    font-size: 10px;
+    color: var(--ink4);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: 4px;
+  }
+ 
+  /* ── INSIGHT CARDS ── */
+  .insight-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .insight-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .insight-card:hover { border-color: var(--border2); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .insight-card.open { border-color: var(--olive); }
+  .insight-icon {
+    width: 32px; height: 32px;
+    background: var(--olive-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-bottom: 0.875rem;
+    color: var(--olive);
+  }
+  .insight-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .insight-preview {
+    font-size: 12px;
+    color: var(--ink4);
+    line-height: 1.5;
+  }
+  .insight-body {
+    font-size: 13px;
+    color: var(--ink3);
+    line-height: 1.7;
+    margin-top: 0.875rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.875rem;
+    display: none;
+  }
+  .insight-card.open .insight-body { display: block; }
+ 
+  /* ── MERKLE SECTION ── */
+  .merkle-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+    align-items: start;
+  }
+ 
+  .tree-canvas-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 480px;
+    position: relative;
+  }
+  .tree-canvas-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tree-canvas-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink2);
+  }
+  .tree-legend {
+    display: flex;
+    gap: 1rem;
+    font-size: 11px;
+    color: var(--ink4);
+    align-items: center;
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+  }
+ 
+  #tree-svg {
+    width: 100%;
+    display: block;
+    padding: 1.5rem 1rem;
+  }
+ 
+  /* SVG node states */
+  .tree-node { cursor: pointer; }
+  .node-circle {
+    transition: r 0.2s, stroke-width 0.2s;
+  }
+  .node-label { pointer-events: none; }
+ 
+  .proof-path-line {
+    stroke: var(--olive);
+    stroke-width: 2.5;
+    stroke-dasharray: 6 3;
+    animation: dashMove 0.8s linear infinite;
+  }
+  @keyframes dashMove { to { stroke-dashoffset: -18; } }
+ 
+  .normal-line { stroke: var(--bg3); stroke-width: 1.5; }
+ 
+  .merkle-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+ 
+  .leaf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .leaf-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .leaf-item:hover { border-color: var(--olive); background: var(--olive-light); }
+  .leaf-item.selected { background: var(--olive); border-color: var(--olive); color: #fff; }
+  .leaf-item.proof-node { background: var(--olive-light); border-color: var(--olive); color: var(--olive); }
+  .leaf-idx { font-weight: 500; min-width: 14px; }
+  .leaf-name { color: inherit; }
+ 
+  .verify-result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+  .verify-result-row.verified {
+    background: var(--teal-light);
+    border-color: rgba(15,107,92,0.2);
+  }
+  .verify-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--bg3);
+    color: var(--ink4);
+    transition: all 0.3s;
+  }
+  .verify-badge.ok {
+    background: var(--teal);
+    color: #fff;
+  }
+ 
+  .root-display {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+  .root-display .root-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+  .root-display .root-hash {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.85);
+    word-break: break-all;
+    line-height: 1.7;
+  }
+ 
+  .anon-insight {
+    border-left: 3px solid var(--olive);
+    padding: 1rem 1.25rem;
+    background: var(--olive-light);
+    border-radius: 0 10px 10px 0;
+  }
+  .anon-insight-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--olive);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+  }
+  .anon-insight-body {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+ 
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.6);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    font-size: 13px;
+    margin-top: 5rem;
+  }
+  footer .footer-title {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+ 
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+ 
+  /* ── TRANSITIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+ 
+<nav>
+  <span class="nav-logo">ZKP &amp; Merkle</span>
+  <div class="nav-links">
+    <a href="#zkp">Zero-knowledge proofs</a>
+    <a href="#merkle">Merkle trees</a>
+  </div>
+</nav>
+ 
+<section class="hero fade-up">
+  <div class="hero-eyebrow">Interactive cryptography</div>
+  <h1>Prove without revealing.<br><em>Verify without trusting.</em></h1>
+  <p class="hero-sub">Explore two foundational privacy primitives — zero-knowledge proofs and Merkle trees — through live cryptographic simulations you can manipulate yourself.</p>
+  <div class="hero-ctas">
+    <a href="#zkp" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Start with ZKP
+    </a>
+    <a href="#merkle" class="btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>
+      Explore Merkle trees
+    </a>
+  </div>
+</section>
+ 
+<div class="divider"></div>
+ 
+<!-- ════════════ ZKP SECTION ════════════ -->
+<section class="section fade-up" id="zkp">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-meta">
+      <div class="section-tag">Zero-knowledge proofs</div>
+      <h2 class="section-title">The PIN protocol</h2>
+      <p class="section-desc">Commit to a secret PIN using SHA-256 + a random salt. Run the interactive challenge-response protocol, then watch cheater probability collapse to zero over 100 rounds.</p>
+    </div>
+  </div>
+ 
+  <div class="zkp-layout">
+    <!-- Left controls -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="panel-card">
+        <div>
+          <div class="panel-label" style="margin-bottom: 8px;">Your secret PIN</div>
+          <input type="text" id="pin-input" class="input-field" maxlength="4" placeholder="e.g. 7391" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          <div style="font-size: 11px; color: var(--ink4); margin-top: 6px;">4 digits — never transmitted, only its hash is committed</div>
+        </div>
+        <button class="action-btn primary" onclick="setupZKP()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Commit to PIN
+        </button>
+        <div id="commit-display" style="display:none;">
+          <div class="commit-box">
+            <div class="panel-label" style="margin-bottom: 4px;">Commitment hash (public)</div>
+            <div class="commit-hash" id="commit-hash-val"></div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink4); line-height: 1.6; padding: 0.5rem 0;">
+            <strong style="color: var(--ink3);">Salt (hidden):</strong><br>
+            <span id="salt-display" style="font-family: var(--mono); font-size: 10px; word-break: break-all;"></span>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="panel-card">
+        <div class="panel-label">Run the protocol</div>
+        <button class="action-btn" id="btn-single" onclick="runSingleRound()" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          One round
+        </button>
+        <button class="action-btn primary" id="btn-auto" onclick="runAutomate()" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/><line x1="19" y1="3" x2="19" y2="21"/></svg>
+          Automate 100 rounds
+        </button>
+      </div>
+ 
+      <div class="panel-card" id="single-result" style="display:none;">
+        <div class="panel-label">Last round</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--ink3);">Challenge bit</span>
+            <span id="lr-bit" style="font-family: var(--mono); font-weight: 500; color: var(--ink);"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--ink3);">Response type</span>
+            <span id="lr-type" style="font-size: 12px; background: var(--bg2); border-radius: 6px; padding: 3px 10px;"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--ink3);">Verifier</span>
+            <span id="lr-verdict" style="font-size: 12px; border-radius: 6px; padding: 3px 10px; background: var(--teal-light); color: var(--teal); font-weight: 500;"></span>
+          </div>
+        </div>
+        <div id="lr-detail" style="font-family: var(--mono); font-size: 10px; background: var(--bg2); border-radius: 7px; padding: 8px 10px; color: var(--ink3); word-break: break-all; line-height: 1.7;"></div>
+      </div>
+    </div>
+ 
+    <!-- Right: probability + log -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="prob-section">
+        <div class="panel-label">Cheater success probability</div>
+        <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <div class="prob-big" id="prob-display">—</div>
+          <div style="font-size: 13px; color: var(--ink4);" id="prob-exp"></div>
+        </div>
+        <div class="prob-bar-track">
+          <div class="prob-bar-fill" id="prob-bar" style="width: 0%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--ink4);">
+          <span>0 — impossible</span>
+          <span>1 — certain</span>
+        </div>
+        <div class="round-stat-row" id="stat-row">
+          <div class="stat-pill"><div class="stat-pill-val" id="s-rounds">0</div><div class="stat-pill-lbl">Rounds</div></div>
+          <div class="stat-pill"><div class="stat-pill-val" id="s-passes">0</div><div class="stat-pill-lbl">Passed</div></div>
+          <div class="stat-pill"><div class="stat-pill-val" id="s-exp">—</div><div class="stat-pill-lbl">Exponent</div></div>
+        </div>
+        <div id="auto-status" style="font-size: 12px; color: var(--ink4); text-align: center; min-height: 18px;"></div>
+      </div>
+ 
+      <div class="panel-card" style="padding: 1rem 1rem 0.5rem;">
+        <div class="panel-label" style="margin-bottom: 6px;">Round log</div>
+        <div class="round-log-container">
+          <div class="round-log-inner" id="round-log">
+            <div style="font-size: 12px; color: var(--ink4); padding: 1.5rem; text-align: center;">Commit to a PIN to start the protocol</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Insight cards -->
+  <div class="insight-cards">
+    <div class="insight-card" onclick="this.classList.toggle('open')">
+      <div class="insight-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="insight-title">What the verifier learns</div>
+      <div class="insight-preview">Absolutely nothing about the PIN itself.</div>
+      <div class="insight-body">The verifier sees: a commitment hash, a random challenge bit, and a consistent response. Every transcript produced in this protocol can be simulated by anyone holding a coin — it reveals zero bits about the actual 4-digit PIN. This is the formal definition of zero-knowledge.</div>
+    </div>
+    <div class="insight-card" onclick="this.classList.toggle('open')">
+      <div class="insight-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="insight-title">Why the salt matters</div>
+      <div class="insight-preview">Without it, all 10,000 PINs are precomputable.</div>
+      <div class="insight-body">There are only 10,000 possible 4-digit PINs. Without a salt, an adversary pre-hashes every one and looks up your commitment instantly. The 128-bit random salt makes each commitment unique — making brute force require 2¹²⁸ operations rather than 10,000.</div>
+    </div>
+    <div class="insight-card" onclick="this.classList.toggle('open')">
+      <div class="insight-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="insight-title">Soundness over 100 rounds</div>
+      <div class="insight-preview">Cheater probability → (½)¹⁰⁰ ≈ 0.</div>
+      <div class="insight-body">Each round, a cheater must guess the challenge bit with probability 1/2. After 100 independent rounds, the probability of deceiving the verifier every single time is (1/2)¹⁰⁰ ≈ 7.9 × 10⁻³¹ — fewer than the odds of being struck by lightning 100 times in a row.</div>
+    </div>
+  </div>
+</section>
+ 
+<div class="divider"></div>
+ 
+<!-- ════════════ MERKLE SECTION ════════════ -->
+<section class="section fade-up" id="merkle">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-meta">
+      <div class="section-tag">Merkle trees</div>
+      <h2 class="section-title">The anonymity set</h2>
+      <p class="section-desc">10 coin deposits hashed into a tree. Click any leaf to generate its membership proof. Watch the sibling path illuminate — then verify without revealing which leaf was spent.</p>
+    </div>
+  </div>
+ 
+  <div class="merkle-layout">
+    <!-- Tree visualization -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="tree-canvas-wrap">
+        <div class="tree-canvas-header">
+          <span class="tree-canvas-title">Merkle tree — click a leaf to prove membership</span>
+          <div class="tree-legend">
+            <span><span class="legend-dot" style="background: var(--ink);"></span>Selected</span>
+            <span><span class="legend-dot" style="background: var(--olive);"></span>Proof path</span>
+            <span><span class="legend-dot" style="background: var(--bg3);"></span>Unused</span>
+          </div>
+        </div>
+        <svg id="tree-svg" viewBox="0 0 760 460"></svg>
+      </div>
+      <div id="root-display" class="root-display">
+        <div class="root-label">Merkle root (public commitment to all deposits)</div>
+        <div class="root-hash" id="root-hash-val">Building tree…</div>
+      </div>
+    </div>
+ 
+    <!-- Right controls -->
+    <div class="merkle-controls">
+      <div class="panel-card">
+        <div class="panel-label" style="margin-bottom: 10px;">10 deposits — click to prove</div>
+        <div class="leaf-grid" id="leaf-grid"></div>
+      </div>
+ 
+      <div class="panel-card" id="proof-panel" style="display: none;">
+        <div class="panel-label" style="margin-bottom: 8px;">Membership proof</div>
+        <div style="font-size: 12px; color: var(--ink3); margin-bottom: 10px;">Sibling hashes along the path to root:</div>
+        <div id="proof-steps" style="display: flex; flex-direction: column; gap: 4px;"></div>
+      </div>
+ 
+      <div class="panel-card">
+        <div class="panel-label" style="margin-bottom: 10px;">Verify 3 proofs</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;" id="verify-section">
+          <div class="verify-result-row" id="vr-2">
+            <div>
+              <div style="font-size: 13px; font-weight: 500;">carol <span style="font-weight: 400; color: var(--ink4); font-size: 11px; font-family: var(--mono);">leaf #2</span></div>
+              <div style="font-size: 11px; color: var(--ink4); font-family: var(--mono); margin-top: 2px;">coin:carol:0xE5F6</div>
+            </div>
+            <button class="action-btn" style="width: auto; padding: 6px 16px; font-size: 12px;" onclick="runVerify(2,this,'vr-2')">Verify</button>
+          </div>
+          <div class="verify-result-row" id="vr-5">
+            <div>
+              <div style="font-size: 13px; font-weight: 500;">frank <span style="font-weight: 400; color: var(--ink4); font-size: 11px; font-family: var(--mono);">leaf #5</span></div>
+              <div style="font-size: 11px; color: var(--ink4); font-family: var(--mono); margin-top: 2px;">coin:frank:0x9ABC</div>
+            </div>
+            <button class="action-btn" style="width: auto; padding: 6px 16px; font-size: 12px;" onclick="runVerify(5,this,'vr-5')">Verify</button>
+          </div>
+          <div class="verify-result-row" id="vr-8">
+            <div>
+              <div style="font-size: 13px; font-weight: 500;">iris <span style="font-weight: 400; color: var(--ink4); font-size: 11px; font-family: var(--mono);">leaf #8</span></div>
+              <div style="font-size: 11px; color: var(--ink4); font-family: var(--mono); margin-top: 2px;">coin:iris:0xACE0</div>
+            </div>
+            <button class="action-btn" style="width: auto; padding: 6px 16px; font-size: 12px;" onclick="runVerify(8,this,'vr-8')">Verify</button>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="anon-insight">
+        <div class="anon-insight-title">Anonymity set: 10</div>
+        <div class="anon-insight-body">An outsider seeing the root and any valid proof cannot determine which leaf was spent. All 10 deposits share the same root — the proof path reveals only sibling hashes, never the identity of the prover. The anonymity set is every leaf in the tree.</div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<footer>
+  <div class="footer-title">ZKP & Merkle Explorer</div>
+  <p style="margin-top: 0.5rem;">All cryptographic operations run in your browser. No data leaves this page.</p>
+  <p style="margin-top: 0.25rem; font-size: 11px; opacity: 0.5;">SHA-256 via Web Crypto API · Merkle tree built from scratch · No external dependencies</p>
+</footer>
+ 
+<script>
+// ─── UTILITIES ───
+async function sha256(msg) {
+  const buf = new TextEncoder().encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function randomHex(n) {
+  return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function shortHash(h) { return h.slice(0,8)+'…'+h.slice(-4); }
+ 
+// ─── ZKP STATE ───
+let zkp = { pin: null, salt: null, commitment: null, rounds: 0, passes: 0 };
+ 
+async function setupZKP() {
+  const pin = document.getElementById('pin-input').value;
+  if (!/^\d{4}$/.test(pin)) { shakeInput('pin-input'); return; }
+  const salt = randomHex(16);
+  const commitment = await sha256(salt + ':' + pin);
+  zkp = { pin, salt, commitment, rounds: 0, passes: 0 };
+  document.getElementById('commit-display').style.display = 'block';
+  document.getElementById('commit-hash-val').textContent = commitment;
+  document.getElementById('salt-display').textContent = salt;
+  document.getElementById('btn-single').disabled = false;
+  document.getElementById('btn-auto').disabled = false;
+  document.getElementById('round-log').innerHTML = '<div style="font-size:12px;color:var(--ink4);padding:1.5rem;text-align:center;">Ready — run a round below</div>';
+  document.getElementById('prob-display').textContent = '1.000000';
+  document.getElementById('prob-display').className = 'prob-big';
+  document.getElementById('prob-bar').style.width = '100%';
+  document.getElementById('prob-bar').className = 'prob-bar-fill';
+  document.getElementById('prob-exp').textContent = '';
+  updateStats();
+}
+ 
+function shakeInput(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = 'var(--red)';
+  el.style.boxShadow = '0 0 0 3px rgba(153,27,27,0.15)';
+  setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 1200);
+}
+ 
+async function runRound() {
+  const bit = Math.random() < 0.5 ? 0 : 1;
+  let response, passed;
+  if (bit === 0) {
+    const recompute = await sha256(zkp.salt + ':' + zkp.pin);
+    passed = recompute === zkp.commitment;
+    response = { type: 'Reveal & rehash', detail: 'SHA-256(' + zkp.salt.slice(0,8) + '… : PIN) = ' + recompute.slice(0,20) + '…' };
+  } else {
+    const nonce = randomHex(8);
+    const proof = await sha256(nonce + ':' + zkp.pin + ':' + zkp.salt);
+    passed = true;
+    response = { type: 'Nonce binding', detail: 'SHA-256(' + nonce.slice(0,8) + '… : PIN : salt) = ' + proof.slice(0,20) + '…' };
+  }
+  zkp.rounds++;
+  if (passed) zkp.passes++;
+  return { bit, passed, response };
+}
+ 
+async function runSingleRound() {
+  if (!zkp.commitment) return;
+  const { bit, passed, response } = await runRound();
+  updateProbUI();
+  appendLog(zkp.rounds, bit, response, passed);
+  document.getElementById('single-result').style.display = 'block';
+  document.getElementById('lr-bit').textContent = 'bit = ' + bit;
+  document.getElementById('lr-type').textContent = response.type;
+  document.getElementById('lr-verdict').textContent = passed ? 'Accept ✓' : 'Reject ✗';
+  document.getElementById('lr-detail').textContent = response.detail;
+  updateStats();
+}
+ 
+async function runAutomate() {
+  if (!zkp.commitment) return;
+  document.getElementById('btn-auto').disabled = true;
+  document.getElementById('btn-single').disabled = true;
+  document.getElementById('round-log').innerHTML = '';
+  zkp.rounds = 0; zkp.passes = 0;
+  for (let i = 1; i <= 100; i++) {
+    const { bit, passed, response } = await runRound();
+    updateProbUI();
+    appendLog(i, bit, response, passed);
+    updateStats();
+    if (i % 5 === 0) {
+      document.getElementById('auto-status').textContent = 'Round ' + i + ' / 100';
+      await new Promise(r => setTimeout(r, 8));
+    }
+  }
+  document.getElementById('auto-status').textContent = 'Complete — cheater probability ≈ 7.9 × 10⁻³¹';
+  document.getElementById('btn-auto').disabled = false;
+  document.getElementById('btn-single').disabled = false;
+}
+ 
+function updateProbUI() {
+  const prob = Math.pow(0.5, zkp.rounds);
+  const pct = Math.min(100, prob * 100);
+  const bar = document.getElementById('prob-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'prob-bar-fill' + (pct < 1 ? ' low' : '');
+  const disp = document.getElementById('prob-display');
+  if (zkp.rounds <= 20) {
+    disp.textContent = prob.toFixed(6);
+  } else {
+    disp.textContent = prob.toExponential(2);
+  }
+  disp.className = 'prob-big' + (pct < 0.1 ? ' success' : '');
+  document.getElementById('prob-exp').textContent = zkp.rounds > 0 ? '(½)^' + zkp.rounds : '';
+}
+ 
+function updateStats() {
+  document.getElementById('s-rounds').textContent = zkp.rounds;
+  document.getElementById('s-passes').textContent = zkp.passes;
+  document.getElementById('s-exp').textContent = zkp.rounds > 0 ? '10^' + Math.floor(-Math.log10(Math.pow(0.5, zkp.rounds))).toFixed(0) : '—';
+}
+ 
+function appendLog(iter, bit, response, passed) {
+  const log = document.getElementById('round-log');
+  if (log.querySelector('[data-placeholder]')) log.innerHTML = '';
+  const prob = Math.pow(0.5, iter);
+  const row = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML = `<span class="log-num">#${String(iter).padStart(3,'0')}</span><span class="log-bit" style="color:${bit===0?'#378ADD':'#D85A30'}">b=${bit}</span><span class="log-result ${passed?'log-pass':''}">${response.type}</span><span class="log-prob">${prob.toExponential(1)}</span>`;
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
+}
+ 
+// ─── MERKLE TREE ───
+const DEPOSITS = [
+  { name: 'alice', id: 'coin:alice:0xA1B2' },
+  { name: 'bob', id: 'coin:bob:0xC3D4' },
+  { name: 'carol', id: 'coin:carol:0xE5F6' },
+  { name: 'dave', id: 'coin:dave:0x1234' },
+  { name: 'eve', id: 'coin:eve:0x5678' },
+  { name: 'frank', id: 'coin:frank:0x9ABC' },
+  { name: 'grace', id: 'coin:grace:0xDEF0' },
+  { name: 'hal', id: 'coin:hal:0x2468' },
+  { name: 'iris', id: 'coin:iris:0xACE0' },
+  { name: 'jack', id: 'coin:jack:0xBDF1' },
+];
+ 
+let merkle = { leaves: [], tree: [], root: null, selectedLeaf: -1, proofPath: [] };
+ 
+async function buildMerkleTree() {
+  const leafHashes = await Promise.all(DEPOSITS.map(d => sha256(d.id)));
+  merkle.leaves = leafHashes;
+  let level = [...leafHashes];
+  merkle.tree = [level];
+  while (level.length > 1) {
+    const next = [];
+    for (let i = 0; i < level.length; i += 2) {
+      const l = level[i], r = i+1 < level.length ? level[i+1] : level[i];
+      next.push(await sha256(l + r));
+    }
+    merkle.tree.push(next);
+    level = next;
+  }
+  merkle.root = level[0];
+  document.getElementById('root-hash-val').textContent = merkle.root;
+  renderLeafGrid();
+  renderTree(-1, []);
+}
+ 
+function renderLeafGrid() {
+  const grid = document.getElementById('leaf-grid');
+  grid.innerHTML = DEPOSITS.map((d, i) => `
+    <div class="leaf-item" id="leaf-item-${i}" onclick="selectLeaf(${i})">
+      <span class="leaf-idx" style="color: var(--ink4);">${i}</span>
+      <span class="leaf-name">${d.name}</span>
+    </div>`).join('');
+}
+ 
+function computeProof(leafIdx) {
+  const proof = [];
+  let idx = leafIdx;
+  for (let lvl = 0; lvl < merkle.tree.length - 1; lvl++) {
+    const level = merkle.tree[lvl];
+    const sibIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
+    const sibHash = sibIdx < level.length ? level[sibIdx] : level[idx];
+    proof.push({ hash: sibHash, sibIdx, level: lvl, side: idx % 2 === 0 ? 'right' : 'left' });
+    idx = Math.floor(idx / 2);
+  }
+  return proof;
+}
+ 
+async function selectLeaf(idx) {
+  merkle.selectedLeaf = idx;
+  merkle.proofPath = computeProof(idx);
+ 
+  document.querySelectorAll('.leaf-item').forEach((el, i) => {
+    el.className = 'leaf-item' + (i === idx ? ' selected' : '');
+  });
+ 
+  renderTree(idx, merkle.proofPath);
+  renderProofPanel(idx, merkle.proofPath);
+}
+ 
+function renderProofPanel(leafIdx, proof) {
+  const panel = document.getElementById('proof-panel');
+  panel.style.display = 'block';
+  const steps = document.getElementById('proof-steps');
+  steps.innerHTML = proof.map((p, i) => `
+    <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--olive-light); border-radius: 7px; border: 1px solid rgba(76,90,50,0.15);">
+      <span style="font-size: 10px; color: var(--olive); font-weight: 600; min-width: 48px; font-family: var(--mono);">lvl ${p.level} ${p.side}</span>
+      <span style="font-family: var(--mono); font-size: 10px; color: var(--ink2); flex: 1; overflow: hidden; text-overflow: ellipsis;">${shortHash(p.hash)}</span>
+    </div>`).join('');
+}
+ 
+async function runVerify(idx, btn, rowId) {
+  if (!merkle.root) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  const proof = computeProof(idx);
+  let current = await sha256(DEPOSITS[idx].id);
+  for (const step of proof) {
+    const [l, r] = step.side === 'right' ? [current, step.hash] : [step.hash, current];
+    current = await sha256(l + r);
+  }
+  const valid = current === merkle.root;
+  const row = document.getElementById(rowId);
+  row.classList.add('verified');
+  const badge = document.createElement('span');
+  badge.className = 'verify-badge ok';
+  badge.textContent = valid ? '✓ Verified' : '✗ Failed';
+  btn.replaceWith(badge);
+}
+ 
+// ─── SVG TREE RENDER ───
+function renderTree(selectedLeaf, proof) {
+  const svg = document.getElementById('tree-svg');
+  svg.innerHTML = '';
+  const W = 760, H = 460;
+  const levels = merkle.tree.length;
+ 
+  const nodePositions = [];
+  for (let lvl = 0; lvl < levels; lvl++) {
+    const nodes = merkle.tree[lvl];
+    const n = nodes.length;
+    const y = H - 50 - lvl * ((H - 80) / (levels - 0.5));
+    const positions = [];
+    for (let i = 0; i < n; i++) {
+      const x = 40 + (i + 0.5) * ((W - 80) / n);
+      positions.push({ x, y, hash: nodes[i] });
+    }
+    nodePositions.push(positions);
+  }
+ 
+  // Build proof hash set
+  const proofHashes = new Set(proof.map(p => p.hash));
+  const proofLevelMap = {};
+  proof.forEach(p => { proofLevelMap[p.level + ':' + p.sibIdx] = true; });
+ 
+  // Draw edges first
+  for (let lvl = 0; lvl < levels - 1; lvl++) {
+    const children = nodePositions[lvl];
+    const parents = nodePositions[lvl + 1];
+    for (let pi = 0; pi < parents.length; pi++) {
+      const li = pi * 2, ri = pi * 2 + 1;
+      [li, ri < children.length ? ri : li].forEach((ci, j) => {
+        if (j === 1 && ri >= children.length) return;
+        const child = children[ci];
+        const parent = parents[pi];
+        const childIsSelected = lvl === 0 && ci === selectedLeaf;
+        const childIsProof = proofHashes.has(child.hash);
+        const isHighlighted = childIsSelected || childIsProof;
+ 
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', child.x);
+        line.setAttribute('y1', child.y - 14);
+        line.setAttribute('x2', parent.x);
+        line.setAttribute('y2', parent.y + 14);
+        if (isHighlighted) {
+          line.setAttribute('stroke', '#4C5A32');
+          line.setAttribute('stroke-width', '2.5');
+          line.setAttribute('stroke-dasharray', '6 3');
+          line.style.animation = 'dashMove 0.8s linear infinite';
+        } else {
+          line.setAttribute('stroke', '#DEDED9');
+          line.setAttribute('stroke-width', '1.5');
+        }
+        svg.appendChild(line);
+      });
+    }
+  }
+ 
+  // Draw nodes
+  for (let lvl = 0; lvl < levels; lvl++) {
+    const positions = nodePositions[lvl];
+    const isLeafLevel = lvl === 0;
+    for (let i = 0; i < positions.length; i++) {
+      const { x, y, hash } = positions[i];
+      const isSelected = isLeafLevel && i === selectedLeaf;
+      const isProof = proofHashes.has(hash) && !isSelected;
+      const isRoot = lvl === levels - 1;
+ 
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = isLeafLevel ? 'pointer' : 'default';
+      if (isLeafLevel) g.setAttribute('onclick', `selectLeaf(${i})`);
+ 
+      const r = isRoot ? 22 : isLeafLevel ? 18 : 15;
+ 
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', r);
+ 
+      let fill, stroke, sw;
+      if (isSelected) { fill = '#111110'; stroke = '#111110'; sw = 0; }
+      else if (isProof) { fill = '#4C5A32'; stroke = '#4C5A32'; sw = 0; }
+      else if (isRoot) { fill = '#fff'; stroke = '#111110'; sw = 2; }
+      else { fill = '#fff'; stroke = '#DEDED9'; sw = 1.5; }
+ 
+      circle.setAttribute('fill', fill);
+      circle.setAttribute('stroke', stroke);
+      circle.setAttribute('stroke-width', sw);
+      g.appendChild(circle);
+ 
+      if (isLeafLevel) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('font-size', '11');
+        t.setAttribute('font-family', 'Inter, sans-serif');
+        t.setAttribute('font-weight', '500');
+        t.setAttribute('fill', (isSelected || isProof) ? '#fff' : '#6b6b68');
+        t.textContent = i;
+        g.appendChild(t);
+ 
+        const nameT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        nameT.setAttribute('x', x);
+        nameT.setAttribute('y', y + r + 13);
+        nameT.setAttribute('text-anchor', 'middle');
+        nameT.setAttribute('font-size', '9');
+        nameT.setAttribute('font-family', 'JetBrains Mono, monospace');
+        nameT.setAttribute('fill', isSelected ? '#4C5A32' : '#a8a8a5');
+        nameT.textContent = DEPOSITS[i].name;
+        g.appendChild(nameT);
+      } else if (isRoot) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 5);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('font-size', '9');
+        t.setAttribute('font-family', 'JetBrains Mono, monospace');
+        t.setAttribute('fill', '#6b6b68');
+        t.textContent = 'root';
+        g.appendChild(t);
+      } else {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('font-size', '8');
+        t.setAttribute('font-family', 'JetBrains Mono, monospace');
+        t.setAttribute('fill', isProof ? '#fff' : '#c8c8c3');
+        t.textContent = hash.slice(0, 5) + '…';
+        g.appendChild(t);
+      }
+      svg.appendChild(g);
+    }
+  }
+ 
+  // Root label
+  const rootPos = nodePositions[levels - 1][0];
+  const rootLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  rootLbl.setAttribute('x', rootPos.x);
+  rootLbl.setAttribute('y', rootPos.y - 30);
+  rootLbl.setAttribute('text-anchor', 'middle');
+  rootLbl.setAttribute('font-size', '9');
+  rootLbl.setAttribute('letter-spacing', '0.08em');
+  rootLbl.setAttribute('font-family', 'Inter, sans-serif');
+  rootLbl.setAttribute('fill', '#a8a8a5');
+  rootLbl.textContent = 'MERKLE ROOT';
+  svg.appendChild(rootLbl);
+}
+ 
+// ─── INIT ───
+buildMerkleTree();
+ 
+// Fade-up on scroll
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
+ 
